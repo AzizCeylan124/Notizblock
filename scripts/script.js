@@ -1,9 +1,29 @@
+   
+let allNotes = {
+    'notes': [],
+    'archives': [],
+    'trashNotes': []
+}
 
-let notes = [];
-let archives = [];
-let trashNotes = [];
+function addNote() {
+    const noteInputRef = document.getElementById('note_input');
+    const noteInput = noteInputRef.value;
+    if (noteInput.trim() !== "") {
+        allNotes.notes.push({text: noteInput});
+        noteInputRef.value = "";
+        saveAllNotes();
+        renderAllNotes();
+    }
+}
+     
+function moveNote(indexNote, startKey, destinationKey) {
+    let note = allNotes[startKey].splice(indexNote, 1);
+    allNotes[destinationKey].push(note[0]);
+    saveToLocalStorage();
+    renderAllNotes();
+}
 
-function randerAllNotes() {
+function renderAllNotes() {
     renderNotes();
     renderArchives();
     renderTrashNotes();
@@ -12,7 +32,7 @@ function randerAllNotes() {
 function renderNotes() {
     const contentRef = document.getElementById('content');
     contentRef.innerHTML = "";
-    notes.forEach((note, index) => {
+    allNotes.notes.forEach((note, index) => {
         contentRef.innerHTML += getNoteTemplate(index, note);
     });
 }
@@ -20,7 +40,7 @@ function renderNotes() {
 function renderArchives() {
     const contentRef = document.getElementById('Archiv_content');
     contentRef.innerHTML = "";
-    archives.forEach((archiv, index) => {
+    allNotes.archives.forEach((archiv, index) => {
         contentRef.innerHTML += getArchivesTemplate(index, archiv);
     });
 }
@@ -28,65 +48,20 @@ function renderArchives() {
 function renderTrashNotes() {
     const trashContentRef = document.getElementById('trash_content');
     trashContentRef.innerHTML = "";
-    trashNotes.forEach((trashNote, index) => {
+    allNotes.trashNotes.forEach((trashNote, index) => {
         trashContentRef.innerHTML += getTrashNoteTemplate(index, trashNote);
     });
 }
 
-function addNote() {
-    const noteInputRef = document.getElementById('note_input');
-    const noteInput = noteInputRef.value;
-    if (noteInput.trim() !== "") {
-        notes.push(noteInput);
-        noteInputRef.value = "";
-        saveToLocalStorage();
-        renderNotes();
-    }
-}
-// Note
-function noteToArchiv(indexNote) {
-    const archive = notes.splice(indexNote, 1)[0];
-    archives.push(archive);
-    saveAllNotes();
-    randerAllNotes();
-}
+//delete
 
-function noteToTrash(indexNote) {
-    const trashNote = notes.splice(indexNote, 1)[0];
-    trashNotes.push(trashNote);
-    saveAllNotes();
-    randerAllNotes();
-}
-// Archiv
-function archivNoteToTrash(indexArchive) {
-    const trashNote = archives.splice(indexArchive, 1)[0];
-    trashNotes.push(trashNote);
-    saveAllNotes();
-    randerAllNotes();
-}
-
-function restoreArchivNote(indexArchive) {
-    const note = archives.splice(indexArchive, 1)[0];
-    notes.push(note);
-    saveAllNotes();
-    randerAllNotes();
-}
-//Trash
 function deleteNote(indexTrashNote) {
-    trashNotes.splice(indexTrashNote, 1);
+    allNotes.trashNotes.splice(indexTrashNote, 1);
     saveAllNotes();
-    randerAllNotes();
-}
-
-function restoreNote(indexTrashNote) {
-    const note = trashNotes.splice(indexTrashNote, 1)[0];
-    notes.push(note);
-    saveAllNotes();
-    randerAllNotes();
+    renderAllNotes();
 }
 
 // Localstorage
-
 function saveAllNotes() {
     saveToLocalStorage();
     saveToLocalStorageArchives();
@@ -94,31 +69,28 @@ function saveAllNotes() {
 }
 
 function saveToLocalStorage() {
-    localStorage.setItem("notes", JSON.stringify(notes));
+    localStorage.setItem("allNotes.notes", JSON.stringify(allNotes.notes));
 }
 
 function saveToLocalStorageArchives() {
-    localStorage.setItem("archives", JSON.stringify(archives));
+    localStorage.setItem("allNotes.archives", JSON.stringify(allNotes.archives));
 }
 
 function saveToLocalStorageTrashNote() {
-    localStorage.setItem("trashNotes", JSON.stringify(trashNotes));
+    localStorage.setItem("allNotes.trashNotes", JSON.stringify(allNotes.trashNotes));
 }
 
 function getFromLocalStorage() {
-    const storedNotes = localStorage.getItem("notes");
+    const storedNotes = localStorage.getItem("allNotes.notes");
     if (storedNotes) {
-        notes = JSON.parse(storedNotes);
+        allNotes.notes = JSON.parse(storedNotes) || [];
     }
-
-    const storedArchives = localStorage.getItem("archives");
+    const storedArchives = localStorage.getItem("allNotes.archives");
     if (storedArchives) {
-        archives = JSON.parse(storedArchives);
+        allNotes.archives = JSON.parse(storedArchives) || [];
     }
-
-    const storedTrashNotes = localStorage.getItem("trashNotes");
+    const storedTrashNotes = localStorage.getItem("allNotes.trashNotes");
     if (storedTrashNotes) {
-        trashNotes = JSON.parse(storedTrashNotes);
+        allNotes.trashNotes = JSON.parse(storedTrashNotes) || [];
     }
 }
-
